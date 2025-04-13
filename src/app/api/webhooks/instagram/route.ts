@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { InstagramApiClient } from '@/lib/instagram-api';
-import { getTriggerWordsByMedia, renderMessageTemplate } from '@/lib/trigger-words';
-import { getMessageTemplateById } from '@/lib/message-templates';
+import { getTriggerWordsByMedia } from '@/lib/trigger-words';
+import { getMessageTemplateById, renderMessageTemplate } from '@/lib/message-templates';
 
 // Verify webhook
 export async function GET(request: NextRequest) {
