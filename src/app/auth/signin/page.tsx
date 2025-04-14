@@ -1,10 +1,42 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
+// Main component that uses Suspense
 export default function SignIn() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        display: 'flex',
+        minHeight: '100vh',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f5f5f5',
+        padding: '20px'
+      }}>
+        <div style={{
+          maxWidth: '400px',
+          width: '100%',
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+          padding: '32px',
+          textAlign: 'center'
+        }}>
+          Loading...
+        </div>
+      </div>
+    }>
+      <SignInContent />
+    </Suspense>
+  );
+}
+
+// Child component that uses useSearchParams
+function SignInContent() {
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
