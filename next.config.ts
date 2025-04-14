@@ -1,8 +1,7 @@
-# If you need to create the file
-echo 'const nextConfig = {
+const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
 };
 
-export default nextConfig;' > next.config.ts
+export default nextConfig;
