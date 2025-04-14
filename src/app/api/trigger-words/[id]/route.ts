@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { getTriggerWordById, updateTriggerWord, deleteTriggerWord } from '@/lib/trigger-words';
-import { connectToDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
-
-// Add this function to the trigger-words.ts file
-async function getTriggerWordById(id: string): Promise<any> {
-  const db = await connectToDatabase();
-  return db.collection('trigger_words').findOne({ _id: new ObjectId(id) });
-}
 
 export async function GET(
   request: NextRequest,

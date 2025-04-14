@@ -34,6 +34,7 @@ export default function TriggersPage() {
     isActive: true
   });
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -43,6 +44,16 @@ export default function TriggersPage() {
       fetchTemplates();
     }
   }, [status, router]);
+  
+  // Clear success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const fetchTriggers = async () => {
     try {
@@ -100,6 +111,7 @@ export default function TriggersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(''); // Clear any previous errors
     
     if (!newTrigger.mediaId || !newTrigger.word || !newTrigger.responseTemplateId) {
       setError('Please fill in all required fields');
@@ -117,11 +129,13 @@ export default function TriggersPage() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to create trigger word');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create trigger word');
       }
       
       await fetchTriggers();
       handleCloseModal();
+      setSuccessMessage('Trigger word added successfully!');
     } catch (error) {
       console.error('Error creating trigger word:', error);
       setError('Failed to create trigger word');
@@ -210,6 +224,18 @@ export default function TriggersPage() {
           marginBottom: '16px' 
         }}>
           {error}
+        </div>
+      )}
+      
+      {successMessage && (
+        <div style={{ 
+          padding: '12px', 
+          backgroundColor: '#dcfce7', 
+          color: '#166534', 
+          borderRadius: '4px', 
+          marginBottom: '16px' 
+        }}>
+          {successMessage}
         </div>
       )}
       
