@@ -2,9 +2,9 @@ import { connectToDatabase } from './mongodb';
 import { InstagramApiClient } from './instagram-api';
 import { getTriggerWordsByMedia } from './trigger-words';
 import { getMessageTemplateById } from './message-templates';
-import { Collection, Db } from 'mongodb';
+import { Db } from 'mongodb';
 
-// Define types for comments and response logs
+// Define interfaces for comments and response logs
 interface Comment {
   id: string;
   text: string;
@@ -22,12 +22,6 @@ interface ResponseLog {
   responseMessage: string;
   triggerWord: string;
   respondedAt: string;
-}
-
-interface ProcessedComment {
-  commentId: string;
-  mediaId: string;
-  processedAt: string;
 }
 
 export class CommentMonitoringService {

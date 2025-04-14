@@ -61,7 +61,7 @@ async function processComment(commentData: {
   media_id: string;
   text: string;
   username: string;
-  from: any; // Or specify a more specific type if known
+  from: unknown; // Using unknown instead of any
 }) {
   try {
     const db = await connectToDatabase();
