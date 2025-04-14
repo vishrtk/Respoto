@@ -2,10 +2,91 @@ import axios from 'axios';
 
 const GRAPH_API_URL = 'https://graph.facebook.com/v18.0';
 
+// Define interfaces for API responses
+interface FacebookPage {
+  id: string;
+  access_token: string;
+  name?: string;
+}
+
+interface InstagramBusinessAccount {
+  id: string;
+}
+
+interface FacebookPagesResponse {
+  data: FacebookPage[];
+  paging?: {
+    cursors: {
+      before: string;
+      after: string;
+    };
+    next?: string;
+  };
+}
+
+interface InstagramProfileResponse {
+  id: string;
+  username: string;
+  profile_picture_url?: string;
+  name?: string;
+  biography?: string;
+  follows_count?: number;
+  followers_count?: number;
+  media_count?: number;
+}
+
+interface MediaResponse {
+  data: MediaItem[];
+  paging?: {
+    cursors: {
+      before: string;
+      after: string;
+    };
+    next?: string;
+  };
+}
+
+interface MediaItem {
+  id: string;
+  caption?: string;
+  media_type: string;
+  media_url?: string;
+  permalink?: string;
+  thumbnail_url?: string;
+  timestamp: string;
+  username: string;
+  comments_count?: number;
+  like_count?: number;
+}
+
+interface CommentsResponse {
+  data: CommentItem[];
+  paging?: {
+    cursors: {
+      before: string;
+      after: string;
+    };
+    next?: string;
+  };
+}
+
+interface CommentItem {
+  id: string;
+  text: string;
+  username: string;
+  timestamp: string;
+  like_count?: number;
+}
+
+interface ReplyResponse {
+  id: string;
+  text: string;
+}
+
 export class InstagramApiClient {
   private accessToken: string;
 
-  constructor(accessToken: string)  {
+  constructor(accessToken: string)   {
     this.accessToken = accessToken;
   }
 
@@ -15,7 +96,7 @@ export class InstagramApiClient {
   async getInstagramBusinessAccountId(): Promise<string> {
     try {
       // First, get the user's Facebook Pages
-      const pagesResponse = await axios.get(`${GRAPH_API_URL}/me/accounts`, {
+      const pagesResponse = await axios.get<FacebookPagesResponse>(`${GRAPH_API_URL}/me/accounts`, {
         params: {
           access_token: this.accessToken,
         },
@@ -30,7 +111,7 @@ export class InstagramApiClient {
         const pageId = page.id;
         const pageAccessToken = page.access_token;
 
-        const instagramResponse = await axios.get(`${GRAPH_API_URL}/${pageId}`, {
+        const instagramResponse = await axios.get<{instagram_business_account?: InstagramBusinessAccount}>(`${GRAPH_API_URL}/${pageId}`, {
           params: {
             fields: 'instagram_business_account',
             access_token: pageAccessToken,
@@ -52,11 +133,11 @@ export class InstagramApiClient {
   /**
    * Get the Instagram Business Account profile information
    */
-  async getProfile(): Promise<any> {
+  async getProfile(): Promise<InstagramProfileResponse> {
     try {
       const instagramAccountId = await this.getInstagramBusinessAccountId();
 
-      const profileResponse = await axios.get(`${GRAPH_API_URL}/${instagramAccountId}`, {
+      const profileResponse = await axios.get<InstagramProfileResponse>(`${GRAPH_API_URL}/${instagramAccountId}`, {
         params: {
           fields: 'id,username,profile_picture_url,name,biography,follows_count,followers_count,media_count',
           access_token: this.accessToken,
@@ -73,11 +154,11 @@ export class InstagramApiClient {
   /**
    * Get recent media from the Instagram Business Account
    */
-  async getRecentMedia(limit = 25): Promise<any> {
+  async getRecentMedia(limit = 25): Promise<MediaResponse> {
     try {
       const instagramAccountId = await this.getInstagramBusinessAccountId();
 
-      const mediaResponse = await axios.get(`${GRAPH_API_URL}/${instagramAccountId}/media`, {
+      const mediaResponse = await axios.get<MediaResponse>(`${GRAPH_API_URL}/${instagramAccountId}/media`, {
         params: {
           fields: 'id,caption,media_type,media_url,permalink,thumbnail_url,timestamp,username,comments_count,like_count',
           limit,
@@ -95,9 +176,9 @@ export class InstagramApiClient {
   /**
    * Get comments for a specific media
    */
-  async getMediaComments(mediaId: string, limit = 50): Promise<any> {
+  async getMediaComments(mediaId: string, limit = 50): Promise<CommentsResponse> {
     try {
-      const commentsResponse = await axios.get(`${GRAPH_API_URL}/${mediaId}/comments`, {
+      const commentsResponse = await axios.get<CommentsResponse>(`${GRAPH_API_URL}/${mediaId}/comments`, {
         params: {
           fields: 'id,text,username,timestamp,like_count',
           limit,
@@ -115,9 +196,9 @@ export class InstagramApiClient {
   /**
    * Reply to a comment
    */
-  async replyToComment(commentId: string, message: string): Promise<any> {
+  async replyToComment(commentId: string, message: string): Promise<ReplyResponse> {
     try {
-      const replyResponse = await axios.post(`${GRAPH_API_URL}/${commentId}/replies`, null, {
+      const replyResponse = await axios.post<ReplyResponse>(`${GRAPH_API_URL}/${commentId}/replies`, null, {
         params: {
           message,
           access_token: this.accessToken,
@@ -134,9 +215,9 @@ export class InstagramApiClient {
   /**
    * Send a private reply to a comment
    */
-  async sendPrivateReply(commentId: string, message: string): Promise<any> {
+  async sendPrivateReply(commentId: string, message: string): Promise<{success: boolean}> {
     try {
-      const privateReplyResponse = await axios.post(`${GRAPH_API_URL}/${commentId}/private_replies`, null, {
+      const privateReplyResponse = await axios.post<{success: boolean}>(`${GRAPH_API_URL}/${commentId}/private_replies`, null, {
         params: {
           message,
           access_token: this.accessToken,

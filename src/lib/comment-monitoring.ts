@@ -2,9 +2,36 @@ import { connectToDatabase } from './mongodb';
 import { InstagramApiClient } from './instagram-api';
 import { getTriggerWordsByMedia } from './trigger-words';
 import { getMessageTemplateById } from './message-templates';
+import { Collection, Db } from 'mongodb';
+
+// Define types for comments and response logs
+interface Comment {
+  id: string;
+  text: string;
+  username: string;
+  timestamp?: string;
+  like_count?: number;
+}
+
+interface ResponseLog {
+  userId: string;
+  mediaId: string;
+  commentId: string;
+  commentText: string;
+  commenterUsername: string;
+  responseMessage: string;
+  triggerWord: string;
+  respondedAt: string;
+}
+
+interface ProcessedComment {
+  commentId: string;
+  mediaId: string;
+  processedAt: string;
+}
 
 export class CommentMonitoringService {
-  private db: any;
+  private db: Db | null = null;
   
   constructor() {
     // Initialize database connection
@@ -45,7 +72,7 @@ export class CommentMonitoringService {
       let responseCount = 0;
       
       // Process each comment
-      for (const comment of commentsResponse.data) {
+      for (const comment of commentsResponse.data as Comment[]) {
         // Check if we've already processed this comment
         const existingComment = await this.db.collection('processed_comments').findOne({ commentId: comment.id });
         
@@ -108,7 +135,7 @@ export class CommentMonitoringService {
   /**
    * Get response logs for a user
    */
-  async getResponseLogs(userId: string, limit = 50): Promise<any[]> {
+  async getResponseLogs(userId: string, limit = 50): Promise<ResponseLog[]> {
     try {
       // Ensure database is initialized
       if (!this.db) {
@@ -121,7 +148,7 @@ export class CommentMonitoringService {
         .limit(limit)
         .toArray();
       
-      return logs;
+      return logs as ResponseLog[];
     } catch (error) {
       console.error(`Error getting response logs for user ${userId}:`, error);
       throw error;

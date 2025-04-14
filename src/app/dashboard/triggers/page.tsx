@@ -21,7 +21,7 @@ interface Template {
 }
 
 export default function TriggersPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [triggers, setTriggers] = useState<TriggerWord[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
