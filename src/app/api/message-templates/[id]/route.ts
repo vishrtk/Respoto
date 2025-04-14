@@ -4,8 +4,9 @@ import { getMessageTemplateById, updateMessageTemplate, deleteMessageTemplate } 
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
+  const { id } = context.params;
   try {
     const session = await getServerSession();
     
