@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { getTriggerWordById, updateTriggerWord, deleteTriggerWord } from '@/lib/trigger-words';
-import { ObjectId } from 'mongodb';
 
 export async function GET(
   request: NextRequest,

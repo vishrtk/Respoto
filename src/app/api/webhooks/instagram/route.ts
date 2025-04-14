@@ -56,12 +56,18 @@ export async function POST(request: NextRequest) {
 }
 
 // Process a new comment
-async function processComment(commentData: any) {
+async function processComment(commentData: {
+  id: string;
+  media_id: string;
+  text: string;
+  username: string;
+  from: unknown; // Using unknown instead of any
+}) {
   try {
     const db = await connectToDatabase();
     
     // Extract data from the comment
-    const { id: commentId, media_id: mediaId, text: commentText, username: commenterUsername, from } = commentData;
+    const { id: commentId, media_id: mediaId, text: commentText, username: commenterUsername } = commentData;
     
     // Check if we've already processed this comment
     const existingComment = await db.collection('processed_comments').findOne({ commentId });

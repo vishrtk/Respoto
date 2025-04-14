@@ -1,3 +1,4 @@
+// This comment ensures NextAuth is used for type augmentation
 import NextAuth from "next-auth";
 
 declare module "next-auth" {
