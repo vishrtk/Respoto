@@ -21,7 +21,7 @@ interface Template {
 }
 
 export default function TriggersPage() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [triggers, setTriggers] = useState<TriggerWord[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -34,7 +34,13 @@ export default function TriggersPage() {
     isActive: true
   });
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  // Add this state to detect client-side rendering
+  const [isClient, setIsClient] = useState(false);
+
+  // Add this useEffect to set isClient to true when component mounts on client
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -44,16 +50,6 @@ export default function TriggersPage() {
       fetchTemplates();
     }
   }, [status, router]);
-  
-  // Clear success message after 3 seconds
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        setSuccessMessage('');
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage]);
 
   const fetchTriggers = async () => {
     try {
@@ -86,10 +82,12 @@ export default function TriggersPage() {
   };
 
   const handleAddNewTrigger = () => {
+    console.log('Add New Trigger button clicked!'); // Debug log
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
+    console.log('Close Modal button clicked!'); // Debug log
     setIsModalOpen(false);
     setNewTrigger({
       mediaId: '',
@@ -111,7 +109,7 @@ export default function TriggersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); // Clear any previous errors
+    console.log('Form submitted!'); // Debug log
     
     if (!newTrigger.mediaId || !newTrigger.word || !newTrigger.responseTemplateId) {
       setError('Please fill in all required fields');
@@ -129,13 +127,11 @@ export default function TriggersPage() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create trigger word');
+        throw new Error('Failed to create trigger word');
       }
       
       await fetchTriggers();
       handleCloseModal();
-      setSuccessMessage('Trigger word added successfully!');
     } catch (error) {
       console.error('Error creating trigger word:', error);
       setError('Failed to create trigger word');
@@ -145,6 +141,7 @@ export default function TriggersPage() {
   };
 
   const handleDeleteTrigger = async (id: string) => {
+    console.log('Delete Trigger button clicked for ID:', id); // Debug log
     if (!confirm('Are you sure you want to delete this trigger word?')) {
       return;
     }
@@ -169,6 +166,7 @@ export default function TriggersPage() {
   };
 
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    console.log('Toggle Active button clicked for ID:', id); // Debug log
     try {
       setIsLoading(true);
       const response = await fetch(`/api/trigger-words/${id}`, {
@@ -200,19 +198,23 @@ export default function TriggersPage() {
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Trigger Words</h1>
-        <button 
-          onClick={handleAddNewTrigger}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Add New Trigger
-        </button>
+        
+        {/* Only render the button on the client side */}
+        {isClient && (
+          <button 
+            onClick={handleAddNewTrigger}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Add New Trigger
+          </button>
+        )}
       </div>
       
       {error && (
@@ -224,18 +226,6 @@ export default function TriggersPage() {
           marginBottom: '16px' 
         }}>
           {error}
-        </div>
-      )}
-      
-      {successMessage && (
-        <div style={{ 
-          padding: '12px', 
-          backgroundColor: '#dcfce7', 
-          color: '#166534', 
-          borderRadius: '4px', 
-          marginBottom: '16px' 
-        }}>
-          {successMessage}
         </div>
       )}
       
@@ -283,34 +273,39 @@ export default function TriggersPage() {
                   </td>
                   <td style={{ padding: '12px' }}>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        onClick={() => handleToggleActive(trigger._id, trigger.isActive)}
-                        style={{
-                          padding: '4px 8px',
-                          backgroundColor: trigger.isActive ? '#fee2e2' : '#dcfce7',
-                          color: trigger.isActive ? '#b91c1c' : '#166534',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        {trigger.isActive ? 'Deactivate' : 'Activate'}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTrigger(trigger._id)}
-                        style={{
-                          padding: '4px 8px',
-                          backgroundColor: '#fee2e2',
-                          color: '#b91c1c',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        Delete
-                      </button>
+                      {/* Only render interactive buttons on the client side */}
+                      {isClient && (
+                        <>
+                          <button
+                            onClick={() => handleToggleActive(trigger._id, trigger.isActive)}
+                            style={{
+                              padding: '4px 8px',
+                              backgroundColor: trigger.isActive ? '#fee2e2' : '#dcfce7',
+                              color: trigger.isActive ? '#b91c1c' : '#166534',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '12px'
+                            }}
+                          >
+                            {trigger.isActive ? 'Deactivate' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTrigger(trigger._id)}
+                            style={{
+                              padding: '4px 8px',
+                              backgroundColor: '#fee2e2',
+                              color: '#b91c1c',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '12px'
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -320,7 +315,8 @@ export default function TriggersPage() {
         </div>
       )}
       
-      {isModalOpen && (
+      {/* Only render the modal on the client side */}
+      {isClient && isModalOpen && (
         <div style={{
           position: 'fixed',
           top: 0,
