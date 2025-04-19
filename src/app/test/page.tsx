@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useBreakpoint, useIsMobile, useIsTablet, useIsDesktop } from '/src/hooks/useBreakpoint';
-import AnimatedElement from '/src/components/ui/AnimatedElement';
-import { LoadingButton, SkeletonCard, ShimmerEffect, PulseEffect, FloatingElement } from '/src/components/ui/LoadingEffects';
-import Button from '/src/components/ui/Button';
-import Card from '/src/components/ui/Card';
-import Badge from '/src/components/ui/Badge';
-import Input from '/src/components/ui/Input';
-import Tabs from '/src/components/ui/Tabs';
-import EmptyState from '/src/components/ui/EmptyState';
+import AnimatedElement from '@/components/ui/AnimatedElement';
+import { useBreakpoint, useIsMobile, useIsTablet, useIsDesktop } from '@/hooks/useBreakpoint';
+import { LoadingButton, SkeletonCard, ShimmerEffect, PulseEffect, FloatingElement } from '@/components/ui/LoadingEffects';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
+import Input from '@/components/ui/Input';
+import Tabs from '@/components/ui/Tabs';
+import EmptyState from '@/components/ui/EmptyState';
 
 export default function TestUI() {
   const { breakpoint, width } = useBreakpoint();

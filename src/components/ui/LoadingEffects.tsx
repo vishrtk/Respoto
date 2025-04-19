@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import AnimatedElement from '/src/components/ui/AnimatedElement';
+import { useEffect, useState } from 'react';
+import AnimatedElement from '@/components/ui/AnimatedElement';
 
 export default function LoadingSpinner() {
   return (
