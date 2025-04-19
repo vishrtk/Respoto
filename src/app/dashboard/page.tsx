@@ -1,25 +1,38 @@
 'use client';
 
-import { useState } from 'react';
-import Modal from '/src/components/modals/Modal';
-import TriggerForm from '/src/components/modals/TriggerForm';
-import TemplateForm from '/src/components/modals/TemplateForm';
-import ConnectInstagramForm from '/src/components/modals/ConnectInstagramForm';
+import React, { useState } from 'react';
+import { useIsMobile } from '@/hooks/useBreakpoint';
+import Button from '@/components/ui/Button';
+import Card, { CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
+import Sidebar, { SidebarItem } from '@/components/ui/Sidebar';
+import Header from '@/components/ui/Header';
+import Tabs from '@/components/ui/Tabs';
+import EmptyState from '@/components/ui/EmptyState';
+import AnimatedElement from '@/components/ui/AnimatedElement';
+import Modal from '@/components/ui/Modal';
+import TriggerForm from '@/components/modals/TriggerForm';
+import TemplateForm from '@/components/modals/TemplateForm';
+import ConnectInstagramForm from '@/components/modals/ConnectInstagramForm';
 
 export default function Dashboard() {
+  // State management
   const [activeTab, setActiveTab] = useState('triggers');
   
   // Modal states
+  const [showTriggerModal, setShowTriggerModal] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
-  const [showConnectInstagram, setShowConnectInstagram] = useState(false);
-  const [showAddTrigger, setShowAddTrigger] = useState(false);
-  const [showCreateTemplate, setShowCreateTemplate] = useState(false);
   
-  // Mock data states
-  const [triggers, setTriggers] = useState<{word: string, response: string}[]>([]);
-  const [templates, setTemplates] = useState<{name: string, content: string}[]>([]);
-  const [connectedAccounts, setConnectedAccounts] = useState<string[]>([]);
+  // Data states
+  const [triggers, setTriggers] = useState([]);
+  const [templates, setTemplates] = useState([]);
+  const [connectedAccounts, setConnectedAccounts] = useState([]);
   
+  // Responsive design
+  const isMobile = useIsMobile();
+
   // Handler functions
   const handleSignOut = () => {
     // In a real app, this would handle authentication logout
@@ -27,542 +40,260 @@ export default function Dashboard() {
     setShowSignOutConfirm(false);
   };
   
-  const handleConnectInstagram = (username: string, password: string) => {
-    // In a real app, this would handle Instagram API authentication
-    setConnectedAccounts([...connectedAccounts, username]);
-    alert(`Connected Instagram account: ${username}`);
-    setShowConnectInstagram(false);
+  const handleConnectInstagram = () => {
+    setShowConnectModal(true);
   };
   
-  const handleAddTrigger = (triggerWord: string, responseTemplate: string) => {
-    setTriggers([...triggers, {word: triggerWord, response: responseTemplate}]);
-    setShowAddTrigger(false);
+  const handleAddTrigger = () => {
+    setShowTriggerModal(true);
   };
   
-  const handleCreateTemplate = (templateName: string, templateContent: string) => {
-    setTemplates([...templates, {name: templateName, content: templateContent}]);
-    setShowCreateTemplate(false);
+  const handleCreateTemplate = () => {
+    setShowTemplateModal(true);
   };
   
+  const handleSaveTrigger = (triggerData) => {
+    setTriggers([...triggers, triggerData]);
+    setShowTriggerModal(false);
+  };
+  
+  const handleSaveTemplate = (templateData) => {
+    setTemplates([...templates, templateData]);
+    setShowTemplateModal(false);
+  };
+  
+  const handleConnectAccount = (accountData) => {
+    setConnectedAccounts([...connectedAccounts, accountData.username]);
+    console.log('Connected account:', accountData);
+    setShowConnectModal(false);
+  };
+
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh'
-    }}>
-      {/* Header */}
-      <header style={{
-        backgroundColor: 'white',
-        borderBottom: '1px solid #e5e5e5',
-        padding: '16px 24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <h1 style={{
-          fontSize: '20px',
-          fontWeight: 'bold',
-          color: '#333'
-        }}>
-          Instagram Auto-Responder
-        </h1>
-        <button 
-          onClick={() => setShowSignOutConfirm(true)}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#f3f4f6',
-            color: '#333',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Header 
+        variant="instagram" 
+        logo={<span className="text-xl font-bold text-instagram-gradient">Respoto</span>}
+        actions={
+          <Button variant="outline" size="sm" onClick={handleSignOut}>Sign Out</Button>
+        }
+      >
+        <h1 className="text-xl font-semibold">Dashboard</h1>
+      </Header>
+
+      <div className="flex flex-1">
+        <Sidebar 
+          variant="instagram"
+          logo={<span className="text-xl font-bold text-instagram-gradient">Respoto</span>}
+          collapsible
+          mobile={isMobile}
         >
-          Sign Out
-        </button>
-      </header>
-      
-      {/* Main content */}
-      <div style={{
-        display: 'flex',
-        flex: '1'
-      }}>
-        {/* Sidebar */}
-        <div style={{
-          width: '240px',
-          backgroundColor: '#f9fafb',
-          borderRight: '1px solid #e5e5e5',
-          padding: '24px 16px'
-        }}>
-          <div style={{
-            marginBottom: '24px'
-          }}>
-            <button 
-              onClick={() => setShowConnectInstagram(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                width: '100%',
-                padding: '12px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
+          <div className="space-y-1 px-3 mb-6">
+            <SidebarItem href="#" active={activeTab === 'triggers'} onClick={() => setActiveTab('triggers')}>
+              Triggers
+            </SidebarItem>
+            <SidebarItem href="#" active={activeTab === 'templates'} onClick={() => setActiveTab('templates')}>
+              Templates
+            </SidebarItem>
+            <SidebarItem href="#" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')}>
+              Settings
+            </SidebarItem>
+          </div>
+          
+          <div className="px-3 mt-auto">
+            <Button 
+              variant="instagram" 
+              fullWidth 
+              onClick={handleConnectInstagram}
+              className="mt-4"
             >
               Connect Instagram
-            </button>
+            </Button>
           </div>
-          
-          <nav>
-            <ul style={{
-              listStyle: 'none',
-              padding: '0',
-              margin: '0'
-            }}>
-              <li>
-                <button 
-                  onClick={() => setActiveTab('triggers')}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '10px 12px',
-                    borderRadius: '4px',
-                    backgroundColor: activeTab === 'triggers' ? '#e5e7eb' : 'transparent',
-                    color: '#333',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    marginBottom: '4px'
-                  }}
-                >
-                  Trigger Words
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => setActiveTab('templates')}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '10px 12px',
-                    borderRadius: '4px',
-                    backgroundColor: activeTab === 'templates' ? '#e5e7eb' : 'transparent',
-                    color: '#333',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    marginBottom: '4px'
-                  }}
-                >
-                  Message Templates
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => setActiveTab('activity')}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '10px 12px',
-                    borderRadius: '4px',
-                    backgroundColor: activeTab === 'activity' ? '#e5e7eb' : 'transparent',
-                    color: '#333',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    marginBottom: '4px'
-                  }}
-                >
-                  Activity Log
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => setActiveTab('settings')}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '10px 12px',
-                    borderRadius: '4px',
-                    backgroundColor: activeTab === 'settings' ? '#e5e7eb' : 'transparent',
-                    color: '#333',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
-                >
-                  Settings
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
-        
-        {/* Content area */}
-        <div style={{
-          flex: '1',
-          padding: '24px'
-        }}>
-          {activeTab === 'triggers' && (
-            <div>
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: 'bold',
-                marginBottom: '16px'
-              }}>
-                Trigger Words
-              </h2>
-              <p style={{
-                marginBottom: '24px',
-                color: '#666'
-              }}>
-                Set up words that will trigger automatic responses to comments on your Instagram posts.
-              </p>
-              
-              <button 
-                onClick={() => setShowAddTrigger(true)}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  marginBottom: '24px'
-                }}
-              >
-                Add New Trigger
-              </button>
-              
-              {triggers.length === 0 ? (
-                <div style={{
-                  backgroundColor: 'white',
-                  borderRadius: '8px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  padding: '16px',
-                  marginBottom: '16px'
-                }}>
-                  <p style={{
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    marginBottom: '8px'
-                  }}>
-                    No trigger words configured yet
-                  </p>
-                  <p style={{
-                    color: '#666',
-                    fontSize: '14px'
-                  }}>
-                    Add your first trigger word to start automatically responding to comments.
-                  </p>
-                </div>
-              ) : (
-                triggers.map((trigger, index) => (
-                  <div key={index} style={{
-                    backgroundColor: 'white',
-                    borderRadius: '8px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    padding: '16px',
-                    marginBottom: '16px'
-                  }}>
-                    <h3 style={{
-                      fontSize: '16px',
-                      fontWeight: '500',
-                      marginBottom: '8px'
-                    }}>
-                      Trigger: "{trigger.word}"
-                    </h3>
-                    <p style={{
-                      color: '#666',
-                      fontSize: '14px',
-                      marginBottom: '8px'
-                    }}>
-                      Response: {trigger.response}
-                    </p>
+        </Sidebar>
+
+        <main className="flex-1 p-4 md:p-6">
+          <AnimatedElement animation="fadeInUp" className="mb-6">
+            <Card variant="instagram">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-semibold mb-2">Welcome to Respoto</h2>
+                    <p className="text-gray-600">Automate your Instagram responses with trigger words</p>
                   </div>
-                ))
-              )}
-            </div>
-          )}
-          
-          {activeTab === 'templates' && (
-            <div>
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: 'bold',
-                marginBottom: '16px'
-              }}>
-                Message Templates
-              </h2>
-              <p style={{
-                marginBottom: '24px',
-                color: '#666'
-              }}>
-                Create reusable message templates for your automatic responses.
-              </p>
-              
-              <button 
-                onClick={() => setShowCreateTemplate(true)}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  marginBottom: '24px'
-                }}
-              >
-                Create New Template
-              </button>
-              
-              {templates.length === 0 ? (
-                <div style={{
-                  backgroundColor: 'white',
-                  borderRadius: '8px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  padding: '16px',
-                  marginBottom: '16px'
-                }}>
-                  <p style={{
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    marginBottom: '8px'
-                  }}>
-                    No message templates created yet
-                  </p>
-                  <p style={{
-                    color: '#666',
-                    fontSize: '14px'
-                  }}>
-                    Create your first message template to use in your automatic responses.
-                  </p>
+                  <Badge variant="instagram" size="lg">Instagram Auto-Responder</Badge>
                 </div>
-              ) : (
-                templates.map((template, index) => (
-                  <div key={index} style={{
-                    backgroundColor: 'white',
-                    borderRadius: '8px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    padding: '16px',
-                    marginBottom: '16px'
-                  }}>
-                    <h3 style={{
-                      fontSize: '16px',
-                      fontWeight: '500',
-                      marginBottom: '8px'
-                    }}>
-                      {template.name}
-                    </h3>
-                    <p style={{
-                      color: '#666',
-                      fontSize: '14px'
-                    }}>
-                      {template.content}
-                    </p>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-          
-          {activeTab === 'activity' && (
-            <div>
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: 'bold',
-                marginBottom: '16px'
-              }}>
-                Activity Log
-              </h2>
-              <p style={{
-                marginBottom: '24px',
-                color: '#666'
-              }}>
-                View a history of automatic responses sent to comments.
-              </p>
-              
-              <div style={{
-                backgroundColor: 'white',
-                borderRadius: '8px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                padding: '16px',
-                marginBottom: '16px'
-              }}>
-                <p style={{
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  marginBottom: '8px'
-                }}>
-                  No activity recorded yet
-                </p>
-                <p style={{
-                  color: '#666',
-                  fontSize: '14px'
-                }}>
-                  Activity will appear here once automatic responses are sent.
-                </p>
-              </div>
-            </div>
-          )}
-          
-          {activeTab === 'settings' && (
-            <div>
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: 'bold',
-                marginBottom: '16px'
-              }}>
-                Settings
-              </h2>
-              <p style={{
-                marginBottom: '24px',
-                color: '#666'
-              }}>
-                Configure your Instagram Auto-Responder settings.
-              </p>
-              
-              <div style={{
-                backgroundColor: 'white',
-                borderRadius: '8px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                padding: '16px',
-                marginBottom: '16px'
-              }}>
-                <h3 style={{
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  marginBottom: '16px'
-                }}>
-                  Connected Accounts
-                </h3>
-                {connectedAccounts.length === 0 ? (
-                  <p style={{
-                    color: '#666',
-                    fontSize: '14px',
-                    marginBottom: '16px'
-                  }}>
-                    No Instagram accounts connected yet.
-                  </p>
-                ) : (
-                  <div style={{ marginBottom: '16px' }}>
-                    {connectedAccounts.map((account, index) => (
-                      <div key={index} style={{
-                        padding: '8px 12px',
-                        backgroundColor: '#f3f4f6',
-                        borderRadius: '4px',
-                        marginBottom: '8px'
-                      }}>
-                        {account}
-                      </div>
+              </CardContent>
+            </Card>
+          </AnimatedElement>
+
+          <div className="mt-6">
+            {activeTab === 'triggers' && (
+              <AnimatedElement animation="fadeIn">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">Trigger Words</h2>
+                  <Button variant="instagram" onClick={handleAddTrigger}>
+                    Add New Trigger
+                  </Button>
+                </div>
+                
+                {triggers.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {triggers.map((trigger, index) => (
+                      <AnimatedElement key={index} animation="fadeInUp" delay={`${index * 100}`}>
+                        <Card isInteractive>
+                          <CardHeader>
+                            <CardTitle>{trigger.triggerWord}</CardTitle>
+                            <CardDescription>Responds with: {trigger.templateName}</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-gray-500">
+                              Active on post: {trigger.postUrl ? new URL(trigger.postUrl).pathname : 'All posts'}
+                            </p>
+                          </CardContent>
+                          <CardFooter>
+                            <Badge variant={trigger.isActive ? 'success' : 'secondary'}>
+                              {trigger.isActive ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </CardFooter>
+                        </Card>
+                      </AnimatedElement>
                     ))}
                   </div>
+                ) : (
+                  <EmptyState
+                    icon={
+                      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                      </svg>
+                    }
+                    title="No triggers created yet"
+                    description="Create your first trigger word to start automating responses on your Instagram posts."
+                    action={{
+                      label: "Add New Trigger",
+                      onClick: handleAddTrigger
+                    }}
+                  />
                 )}
-                <button 
-                  onClick={() => setShowConnectInstagram(true)}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
-                >
-                  Connect Instagram Account
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Modals */}
-      <Modal 
-        isOpen={showSignOutConfirm} 
-        onClose={() => setShowSignOutConfirm(false)}
-        title="Sign Out"
-      >
-        <div>
-          <p style={{ marginBottom: '24px' }}>Are you sure you want to sign out?</p>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '12px'
-          }}>
-            <button
-              onClick={() => setShowSignOutConfirm(false)}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#f3f4f6',
-                color: '#333',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSignOut}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#ef4444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              Sign Out
-            </button>
+              </AnimatedElement>
+            )}
+
+            {activeTab === 'templates' && (
+              <AnimatedElement animation="fadeIn">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">Response Templates</h2>
+                  <Button variant="instagram" onClick={handleCreateTemplate}>
+                    Create New Template
+                  </Button>
+                </div>
+                
+                {templates.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {templates.map((template, index) => (
+                      <AnimatedElement key={index} animation="fadeInUp" delay={`${index * 100}`}>
+                        <Card isInteractive>
+                          <CardHeader>
+                            <CardTitle>{template.name}</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-gray-500 line-clamp-3">
+                              {template.content}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </AnimatedElement>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon={
+                      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    }
+                    title="No templates created yet"
+                    description="Create your first response template to use with your trigger words."
+                    action={{
+                      label: "Create New Template",
+                      onClick: handleCreateTemplate
+                    }}
+                  />
+                )}
+              </AnimatedElement>
+            )}
+
+            {activeTab === 'settings' && (
+              <AnimatedElement animation="fadeIn">
+                <div className="mb-4">
+                  <h2 className="text-xl font-semibold">Account Settings</h2>
+                </div>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Instagram Connection</CardTitle>
+                    <CardDescription>Connect your Instagram account to enable auto-responses</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="mb-4">You need to connect your Instagram account to use Respoto's auto-response features.</p>
+                    {connectedAccounts.length > 0 ? (
+                      <div>
+                        <h3 className="font-medium mb-2">Connected Accounts:</h3>
+                        <ul className="list-disc pl-5 mb-4">
+                          {connectedAccounts.map((account, index) => (
+                            <li key={index}>{account}</li>
+                          ))}
+                        </ul>
+                        <Button variant="instagram" onClick={handleConnectInstagram}>
+                          Connect Another Account
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button variant="instagram" onClick={handleConnectInstagram}>
+                        Connect Instagram Account
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              </AnimatedElement>
+            )}
           </div>
-        </div>
-      </Modal>
-      
-      <Modal 
-        isOpen={showConnectInstagram} 
-        onClose={() => setShowConnectInstagram(false)}
-        title="Connect Instagram Account"
-      >
-        <ConnectInstagramForm 
-          onSubmit={handleConnectInstagram}
-          onCancel={() => setShowConnectInstagram(false)}
-        />
-      </Modal>
-      
-      <Modal 
-        isOpen={showAddTrigger} 
-        onClose={() => setShowAddTrigger(false)}
+        </main>
+      </div>
+
+      {/* Modals */}
+      <Modal
+        isOpen={showTriggerModal}
+        onClose={() => setShowTriggerModal(false)}
         title="Add New Trigger"
+        size="md"
       >
         <TriggerForm 
-          onSubmit={handleAddTrigger}
-          onCancel={() => setShowAddTrigger(false)}
+          onSubmit={handleSaveTrigger} 
+          onCancel={() => setShowTriggerModal(false)}
+          templates={templates}
         />
       </Modal>
-      
-      <Modal 
-        isOpen={showCreateTemplate} 
-        onClose={() => setShowCreateTemplate(false)}
-        title="Create Message Template"
+
+      <Modal
+        isOpen={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+        title="Create New Template"
+        size="md"
       >
         <TemplateForm 
-          onSubmit={handleCreateTemplate}
-          onCancel={() => setShowCreateTemplate(false)}
+          onSubmit={handleSaveTemplate} 
+          onCancel={() => setShowTemplateModal(false)}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+        title="Connect Instagram Account"
+        size="md"
+      >
+        <ConnectInstagramForm 
+          onSubmit={handleConnectAccount} 
+          onCancel={() => setShowConnectModal(false)}
         />
       </Modal>
     </div>
