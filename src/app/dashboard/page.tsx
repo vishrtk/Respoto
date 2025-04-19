@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import Modal from '../../../components/modals/Modal';
-import TriggerForm from '../../../components/modals/TriggerForm';
-import TemplateForm from '../../../components/modals/TemplateForm';
-import ConnectInstagramForm from '../../../components/modals/ConnectInstagramForm';
+import Modal from '/src/components/modals/Modal';
+import TriggerForm from '/src/components/modals/TriggerForm';
+import TemplateForm from '/src/components/modals/TemplateForm';
+import ConnectInstagramForm from '/src/components/modals/ConnectInstagramForm';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('triggers');
